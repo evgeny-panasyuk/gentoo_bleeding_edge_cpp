@@ -3,10 +3,12 @@
 # $Header: $
 
 GCC_FILESDIR=${PORTDIR}/sys-devel/gcc/files
+gcc_LIVE_BRANCH="master"
+gcc_LIVE_COMMIT="8971b3d4b219167a52385f598c392137e32a11c5"
 
 inherit multilib toolchain
 
-DESCRIPTION="The GNU Compiler Collection."
+DESCRIPTION="The GNU Compiler Collection. (+ Concept Lite 0.2)"
 SRC_URI=""
 
 LICENSE="GPL-3 LGPL-3 || ( GPL-3 libgcc libstdc++ gcc-runtime-library-exception-3.1 ) FDL-1.2"
@@ -21,13 +23,13 @@ DEPEND="${RDEPEND}
 	>=${CATEGORY}/binutils-2.18"
 
 if [[ ${CATEGORY} != cross-* ]] ; then
-	PDEPEND="${PDEPEND} elibc_glibc? ( >=sys-libs/glibc-2.8 )"
+	PDEPEND="${PDEPEND} elibc_glibc? ( >=sys-libs/glibc-2.12 )"
 fi
 
 src_unpack() {
 	# use the offline USE flag to prevent the ebuild from trying to update from
 	# the repo.  the current sources will be used instead.
-	use offline && ESVN_OFFLINE="yes"
+	use offline && EVCS_OFFLINE="yes"
 
 	toolchain_src_unpack
 
@@ -35,9 +37,9 @@ src_unpack() {
 
 	# drop-in patches
 	if ! use vanilla ; then
-		if [[ -e ${FILESDIR}/${GCC_RELEASE_VER} ]]; then
-			EPATCH_SOURCE="${FILESDIR}/${GCC_RELEASE_VER}" \
-			EPATCH_EXCLUDE="${FILESDIR}/${GCC_RELEASE_VER}/exclude" \
+		if [[ -e ${FILESDIR}/${PV} ]]; then
+			EPATCH_SOURCE="${FILESDIR}/${PV}" \
+			EPATCH_EXCLUDE="${FILESDIR}/${PV}/exclude" \
 			EPATCH_FORCE="yes" EPATCH_SUFFIX="patch" epatch \
 			|| die "Failed during patching."
 		fi
@@ -50,7 +52,7 @@ src_unpack() {
 	# single-stage build for quick patch testing
 	if use nobootstrap; then
 		GCC_MAKE_TARGET="all"
-		EXTRA_ECONF+="--disable-bootstrap"
+		EXTRA_ECONF+=" --disable-bootstrap"
 	fi
 }
 
